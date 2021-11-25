@@ -1,0 +1,76 @@
+#acesso.py
+#Credenciais de Acesso
+acesso = {
+        "usuario": "devnetuser",
+        "senha": "Cisco123!",
+        "site_DNA": "/dna/system/api/v1/auth/token",
+        "site_DNA_Device": "/dna/intent/api/v1/network-device"
+}
+
+#post_token.py
+#Bibliotecas Utilizadas
+import requests
+from requests.auth import HTTPBasicAuth
+from acesso import acesso
+
+#Acesso POST para gerar o Token
+def gera_token(usuario, senha, site):
+    resposta = requests.post('https://sandboxdnac2.cisco.com{}'.format(site), auth=HTTPBasicAuth(usuario, senha))
+    return resposta
+    #a = resposta.json()
+    #print (a['Token'])
+    
+#a = gera_token(acesso['usuario'], acesso['senha'], acesso['site_DNA'])
+#token_gerado = a.json()
+#print (token_gerado['Token'])
+
+
+#get_devices.py
+from post_token import gera_token
+import requests
+from acesso import acesso
+import pprint
+
+#Função que gera o Token
+s = gera_token(acesso['usuario'], acesso['senha'], acesso['site_DNA'])
+
+token_gerado = s.json()
+#print (type(s))
+#print (type(token_gerado))
+
+#API Get
+url = "https://sandboxdnac2.cisco.com{}".format(acesso['site_DNA_Device'])
+
+payload={}
+headers = {
+  'x-Auth-Token': token_gerado['Token']
+  }
+
+response = requests.get(url, headers=headers, data=payload)
+
+#Tratamento de Dados da API
+dados = response.json()
+#dados_tratado = dados['response']
+#dados_tratado2 = dados_tratado[0]
+
+#print (dados_tratado2['type'])
+#print (type(dados_tratado2))
+
+#pprint.pprint(dados)
+
+#print ("Family: {}".format(dados['response'][0]['family']))
+
+#Função que busca o Equipamento
+def equipo (equip, equip2):
+  index = 1
+  for i in dados['response']:
+    for v , k in i.items():
+      if (v == equip):        
+        pprint.pprint (f'{v}: {k} Linha da Lista:{index}')
+      if (v == equip2):
+        pprint.pprint (f'{v}: {k} Linha da Lista:{index}')
+        
+      index = index + 1
+     
+equipo ('family', 'type')
+
